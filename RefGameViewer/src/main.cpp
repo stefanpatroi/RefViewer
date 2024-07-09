@@ -5,9 +5,9 @@
 #include <time.h>
 
 void handleDial();
-void getCurrTime();
-void printLocalTime();
-void showDates(int, int);
+void getInitialDate(char* dateBuffer);
+void toggleDates();
+void updateDisplay();
 
 #define green 4
 #define clk 17
@@ -15,6 +15,10 @@ void showDates(int, int);
 #define swtch 0 
 
 int lastCLKState;
+int selectedDay;
+int selectedMonth;
+int selectedYear;
+char initialDate[11];
 volatile int encoderValue = 0;
 LiquidCrystal_I2C lcd(0x27, 20, 4);
 
@@ -45,64 +49,88 @@ void setup() {
         delay(500);
         lcd.print(".");
     }
+    lcd.setCursor(0, 0);
     lcd.print("Connected to WiFi");
+    delay(1000);
+    lcd.clear();
 
     configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
-
-    getCurrTime();
+    getInitialDate(initialDate);
+    updateDisplay();
 }
 
 void loop() {
     static unsigned long lastUpdate = 0;
-    if (millis() - lastUpdate >= 1000) {
-        getCurrTime();
+    if (millis() - lastUpdate >= 100) {
+        updateDisplay();
         lastUpdate = millis();
     }
-    lcd.setCursor(0, 1);
-    lcd.print(encoderValue);
 }
 
-void showDates(day, month)
+void toggleDates()
 {
-
-}
-
-
-void handleDial() {
-    int CLKState = digitalRead(clk);
-    int DTState = digitalRead(data);
-
-    if (CLKState != lastCLKState && CLKState == HIGH) {
-        if (DTState != CLKState) {
-            encoderValue++;
-        } else {
-            encoderValue--;
-        }
-    }
-
-    lastCLKState = CLKState;
-}
-
-void getCurrTime() {
-    struct tm timeinfo;
-    if (!getLocalTime(&timeinfo)) {
-        lcd.print("Failed to obtain time");
-        return;
-    }
-    printLocalTime();
-}
-
-void printLocalTime() {
     struct tm timeinfo;
     if (!getLocalTime(&timeinfo)) {
         Serial.println("Failed to obtain time");
         return;
     }
 
-    char buffer[20];
-    strftime(buffer, sizeof(buffer), "%d-%m-%Y %H:%M:%S", &timeinfo);
+    timeinfo.tm_mday += encoderValue;
+    mktime(&timeinfo); 
 
+    selectedDay = timeinfo.tm_mday;
+    selectedMonth = timeinfo.tm_mon + 1; 
+    selectedYear = timeinfo.tm_year + 1900; 
+
+    char dateBuffer[11];
+    strftime(dateBuffer, 11, "%d-%m-%Y", &timeinfo);
+    lcd.setCursor(0, 2);
+    lcd.print(dateBuffer);
+}
+
+void handleDial() {
+    int CLKState = digitalRead(clk);
+    int DTState = digitalRead(data);
+
+    if (CLKState != lastCLKState && CLKState == HIGH) 
+    {
+        if (DTState != CLKState) 
+        {
+            encoderValue++;
+        } 
+        else 
+        {
+           if(encoderValue>0)
+           {
+             encoderValue--;
+           } 
+        }
+    }
+
+
+    lastCLKState = CLKState;
+}
+
+void getInitialDate(char* dateBuffer) {
+    struct tm timeinfo;
+    if (!getLocalTime(&timeinfo)) {
+        Serial.println("Failed to obtain time");
+        dateBuffer[0] = '\0'; 
+        return;
+    }
+
+    // selectedDay = timeinfo.tm_mday;
+    // selectedMonth = timeinfo.tm_mon + 1; 
+    // selectedYear = timeinfo.tm_year + 1900;
+    strftime(dateBuffer, 11, "%d-%m-%Y", &timeinfo);
+}
+
+void updateDisplay() {
     lcd.clear();
     lcd.setCursor(0, 0);
-    lcd.print(buffer);
+    lcd.print("Today: ");
+    lcd.print(initialDate);
+    lcd.setCursor(0, 1);
+    lcd.print("Selection: ");
+    toggleDates();
 }
