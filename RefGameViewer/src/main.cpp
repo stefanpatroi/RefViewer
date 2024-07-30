@@ -77,7 +77,6 @@ void loop() {
             encoderValue = 0;
         }
     }
-    delay(15);
 }
 
 void toggleDates()
