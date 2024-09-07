@@ -3,6 +3,9 @@ import os
 import re
 from bs4 import BeautifulSoup  
 from playwright.sync_api import sync_playwright
+from http.server import SimpleHTTPRequestHandler, HTTPServer
+import threading
+import time 
 
 refCenterCredentials = {"username": "stefanpatroi@gmail.com", "password": "Stefanel15"}
 cometCredentials = {"username": "spatroi", "password": "Stefi2004!"}
@@ -27,6 +30,28 @@ def main():
         makeFiles(path)
         save2files(allGames, path)
         browser.close()
+
+    serverThread = threading.Thread(target=startHttpServer, args=(path,))
+    serverThread.daemon = True
+    serverThread.start()
+
+    try:
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        print("Shutting down...")
+
+def startHttpServer(directory):
+    print(f"Changing directory to {directory}")
+    os.chdir(directory)
+    handler = SimpleHTTPRequestHandler
+    httpd = HTTPServer(('0.0.0.0', 8000), handler)
+    print("Serving HTTP on 0.0.0.0 port 8000")
+    try:
+        httpd.serve_forever()
+    except Exception as e:
+        print(f"Error starting HTTP server: {e}")
+
 
 def refCenterSchedule(page):    
     page.goto('https://www.refcentre.com/Login.aspx?Logout=true')
@@ -84,7 +109,7 @@ def refCenterSchedule(page):
 
     tableOffers = soup2.find('table', {'id': 'ctl00_ContentPlaceHolder1_tblOffers'})
     if not tableOffers:
-        print("Could not find the offers table.")
+        print("No pending offers")
         isOffers = False
     else:
         print("Ref Center Offers Table found!")
