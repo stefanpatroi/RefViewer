@@ -32,8 +32,8 @@ LiquidCrystal_I2C lcd(0x27, 20, 4);
 String httpText; 
 String* extractedLines = new String[1];
 
-const char* ssid = "ORBI27";
-const char* password = "curlymango669";
+const char* ssid = "";
+const char* password = "";
 
 const char* ntpServer = "pool.ntp.org";
 const long gmtOffset_sec = -5 * 3600;
