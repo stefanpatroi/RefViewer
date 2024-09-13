@@ -7,8 +7,8 @@ from http.server import SimpleHTTPRequestHandler, HTTPServer
 import threading
 import time 
 
-refCenterCredentials = {"username": "stefanpatroi@gmail.com", "password": "Stefanel15"}
-cometCredentials = {"username": "spatroi", "password": "Stefi2004!"}
+refCenterCredentials = {"username": "stefanpatroi@gmail.com", "password": ""}
+cometCredentials = {"username": "spatroi", "password": ""}
 refCenterGames = []
 cometGames = []
 allGames = []
