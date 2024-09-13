@@ -13,6 +13,17 @@ refCenterGames = []
 cometGames = []
 allGames = []
 
+abbreviations = {
+    "League2 ON (W)": "L2W", "League2 ON (M)": "L2M", "League1 ON U-20 Reserves (M)": "M20", 
+    "League1 ON U-20 Reserves (W)": "W20", "League1 ON Premier (M)": "L1MP", "League1 ON Premier (W)": "L1WP",
+    "League1 ON Championship (M)": "L1MC", "League1 ON Championship (W)": "L1WC", "OSA Assignments": "*",
+    "PHSAL": "PHSA", "Ont Cup": "OC", "Pine Glen ": "PG", "City View Park Centre F2": "CV", "The Zanchin Automotive Soccer Centre Stadium": "SC",
+    "Norton Community Park ": "NCP", "Corpus Christi": "CC", "Craig Kielburger" "Craig Kielburger SS": "CK", "Redeemer":"RDMR", "Sheridan Trafalgar Campus":"SRDN", 
+    "Paramount Fine Foods Centre ":"PFC", "Mattamy Sports Park":"MTMY", "North Park Turf ": "NP", "Vaughan Grove": "VG", "Sherwood Heights": "SH",
+    "Victoria Park" "Victoria Park Stadium Brampton": "VP", "Downsview Park": "DP", "Sixteen Mile Sports Complex": "16M", "Centennial College": "CENT", 
+    "Bishop Reding SS":"BR"
+}
+
 def main():
     path = "C:\\Ref Games"
     delete(path)
@@ -29,6 +40,10 @@ def main():
             allGames.extend(cometGames)
         makeFiles(path)
         save2files(allGames, path)
+        for file in os.listdir(path):
+            filePath = os.path.join(path, file)
+            reformat(filePath)
+
         browser.close()
 
     serverThread = threading.Thread(target=startHttpServer, args=(path,))
@@ -146,7 +161,6 @@ def cometSchedule(page):
 
     pattern = r'id="homeForm:j_idt\d+:nextMatchesTable"'
 
-# Search for the pattern in the HTML
     match = re.search(pattern, html)
 
     if match:
@@ -219,6 +233,13 @@ def save2files(gameList, path):
             with open(file_path, 'a') as file:
                 file.write(f"{game[2]} {game[3]} {game[4]} (Game Offer)\n")
 
+def reformat(file):
+    with open(file, 'r') as f:
+        content = f.read()
+    for full, abbreviatted in abbreviations.items():
+        content = content.replace(full, abbreviatted)
+    with open(file, 'w') as f:
+        f.write(content)
 
 def delete(directory):
     if not os.path.exists(directory):
@@ -235,8 +256,5 @@ def delete(directory):
             delete(file_path)
 
     os.rmdir(directory)
-
-
-
 
 main()
