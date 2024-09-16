@@ -21,7 +21,7 @@ This project automates the process of retrieving and managing referee schedules 
 
 ### ESP32 Code
 1. Install the Arduino IDE or PlatformIO to program the ESP32.
-2.Download and install the required libraries:
+2. Download and install the required libraries.
 3. Upload the ESP32 code to your device.
 
 ## Usage
